@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
 
 import { useApp } from "@/components/AppContext";
+import { Icon } from "@/components/icons";
 import { uid } from "@/lib/storage";
 import { PEAKS, WEEK, busyBlocks, freeWindows, nowMin, toMin, toHHMM, formatDuration } from "@/lib/routine";
 
@@ -15,28 +15,35 @@ const PRESETS = [
   { label: "Curso", start: "19:00", end: "21:00", days: [2, 4] },
 ];
 
-// Linha do dia: compromissos, horários livres e o "agora".
+// Linha do dia: compromissos (preto), livre (papel) e o "agora" (vermelho).
 function DayStrip({ routine }) {
   const wake = toMin(routine.wake), sleep = toMin(routine.sleep) || 1440;
   const span = Math.max(60, sleep - wake);
-  const pos = (m) => `${((Math.min(Math.max(m, wake), sleep) - wake) / span) * 100}%`;
-  const blocks = busyBlocks(routine);
-  const free = freeWindows(routine, wake);
+  const pct = (m) => ((Math.min(Math.max(m, wake), sleep) - wake) / span) * 100;
   const m = nowMin();
   const left = freeWindows(routine, m).reduce((a, w) => a + (w.e - w.s), 0);
   return (
-    <div className="fa-strip-wrap">
-      <div className="fa-strip">
-        {free.map((w, i) => <span key={`f${i}`} className="free" style={{ left: pos(w.s), width: `calc(${pos(w.e)} - ${pos(w.s)})` }} />)}
-        {blocks.map((b) => (
-          <span key={b.id} className="busy" style={{ left: pos(b.s), width: `calc(${pos(b.e)} - ${pos(b.s)})` }} title={`${b.label} ${b.start}–${b.end}`}>
+    <>
+      <div className="fa-strip" role="img" aria-label={`Seu dia de ${routine.wake} a ${routine.sleep}`}>
+        {busyBlocks(routine).map((b) => (
+          <span key={b.id} className="busy" style={{ left: `${pct(b.s)}%`, width: `${pct(b.e) - pct(b.s)}%` }} title={`${b.label} ${b.start}–${b.end}`}>
             <em>{b.label}</em>
           </span>
         ))}
-        {m >= wake && m <= sleep && <i className="now" style={{ left: pos(m) }} />}
+        {m >= wake && m <= sleep && <span className="now" style={{ left: `${pct(m)}%` }} />}
       </div>
-      <div className="fa-strip-scale"><span>{routine.wake}</span><span>{routine.sleep}</span></div>
-      <p className="fa-note">Hoje ainda sobram <b>{formatDuration(left)}</b> livres.</p>
+      <div className="fa-strip-scale fa-mono"><span>{routine.wake}</span><span>{routine.sleep}</span></div>
+      <div className="fa-left"><b>{formatDuration(left)}</b><span className="fa-mono" style={{ color: "var(--muted)" }}>livres no resto de hoje</span></div>
+    </>
+  );
+}
+
+function Days({ days, onToggle }) {
+  return (
+    <div className="fa-days">
+      {WEEK.map((d, i) => (
+        <button key={i} className={days.includes(i) ? "on" : ""} aria-pressed={days.includes(i)} onClick={() => onToggle(i)}>{d}</button>
+      ))}
     </div>
   );
 }
@@ -58,30 +65,26 @@ export default function Routine() {
   const draftBad = draft.label.trim() && toMin(draft.end) <= toMin(draft.start);
 
   return (
-    <div className="fa-routine">
+    <div>
       <DayStrip routine={routine} />
 
-      <div className="fa-grid2">
-        <label className="fa-card fa-timecard">
-          <small>acordo</small>
+      <div className="fa-times">
+        <label><span className="fa-mono">acordo</span>
           <input type="time" value={routine.wake} onChange={(e) => e.target.value && set({ wake: e.target.value })} />
         </label>
-        <label className="fa-card fa-timecard">
-          <small>durmo</small>
+        <label><span className="fa-mono">durmo</span>
           <input type="time" value={routine.sleep} onChange={(e) => e.target.value && set({ sleep: e.target.value })} />
         </label>
       </div>
 
-      <div className="fa-label">Quando você rende mais?</div>
-      <div className="fa-chips">
+      <label className="fa-label">Quando você rende mais?</label>
+      <div className="fa-seg" role="radiogroup" aria-label="Quando você rende mais">
         {Object.entries(PEAKS).map(([k, v]) => (
-          <button key={k} className={`fa-chip ${routine.peak === k ? "on" : ""}`} onClick={() => set({ peak: k })}>
-            {k === "manha" ? "🌅" : k === "tarde" ? "☀️" : "🌙"} {v}
-          </button>
+          <button key={k} role="radio" aria-checked={routine.peak === k} className={routine.peak === k ? "on" : ""} onClick={() => set({ peak: k })}>{v}</button>
         ))}
       </div>
 
-      <h2 className="fa-h2">Compromissos fixos</h2>
+      <h2 className="fa-h2"><span>Compromissos fixos</span><span style={{ color: "var(--muted)" }}>{routine.blocks.length}</span></h2>
       {routine.blocks.length === 0 && <p className="fa-note">Coisas que já têm horário: escola, trabalho, curso, academia…</p>}
       <ul className="fa-blocks">
         {routine.blocks.map((b) => (
@@ -89,41 +92,27 @@ export default function Routine() {
             <div className="fa-block-top">
               <input className="fa-inline" value={b.label} aria-label="Nome" onChange={(e) => setBlock(b.id, { label: e.target.value })} />
               <input type="time" value={b.start} aria-label="Começa" onChange={(e) => e.target.value && setBlock(b.id, { start: e.target.value })} />
-              <span>–</span>
               <input type="time" value={b.end} aria-label="Termina" onChange={(e) => e.target.value && setBlock(b.id, { end: e.target.value })} />
-              <button className="fa-icon fa-icon-sm" aria-label="Apagar" onClick={() => set({ blocks: routine.blocks.filter((x) => x.id !== b.id) })}><Trash2 size={14} /></button>
+              <button className="fa-text" aria-label={`Apagar ${b.label}`} onClick={() => set({ blocks: routine.blocks.filter((x) => x.id !== b.id) })}><Icon name="x" size={14} /></button>
             </div>
-            <div className="fa-days">
-              {WEEK.map((d, i) => (
-                <button key={i} className={b.days.includes(i) ? "on" : ""} aria-pressed={b.days.includes(i)}
-                  onClick={() => setBlock(b.id, { days: toggleDay(b.days, i) })}>{d}</button>
-              ))}
-            </div>
+            <Days days={b.days} onToggle={(i) => setBlock(b.id, { days: toggleDay(b.days, i) })} />
           </li>
         ))}
       </ul>
 
-      <div className="fa-card fa-newblock">
+      <div className="fa-newblock">
         <div className="fa-block-top">
           <input className="fa-inline" value={draft.label} placeholder="Novo compromisso" aria-label="Nome do compromisso"
             onChange={(e) => setDraft({ ...draft, label: e.target.value })} onKeyDown={(e) => e.key === "Enter" && addBlock()} />
           <input type="time" value={draft.start} aria-label="Começa" onChange={(e) => setDraft({ ...draft, start: e.target.value })} />
-          <span>–</span>
           <input type="time" value={draft.end} aria-label="Termina" onChange={(e) => setDraft({ ...draft, end: e.target.value })} />
         </div>
-        <div className="fa-days">
-          {WEEK.map((d, i) => (
-            <button key={i} className={draft.days.includes(i) ? "on" : ""} aria-pressed={draft.days.includes(i)}
-              onClick={() => setDraft({ ...draft, days: toggleDay(draft.days, i) })}>{d}</button>
-          ))}
-        </div>
+        <Days days={draft.days} onToggle={(i) => setDraft({ ...draft, days: toggleDay(draft.days, i) })} />
         {draftBad && <p className="fa-note" style={{ color: "var(--hot)" }}>O fim precisa ser depois do começo.</p>}
-        <button className="fa-btn" style={{ marginTop: 10 }} disabled={!draft.label.trim() || draftBad} onClick={() => addBlock()}>
-          <Plus size={15} /> adicionar
-        </button>
+        <button className="fa-btn" style={{ marginTop: 12 }} disabled={!draft.label.trim() || draftBad} onClick={() => addBlock()}>Adicionar</button>
         <div className="fa-presets">
           {PRESETS.filter((p) => !routine.blocks.some((b) => b.label === p.label)).map((p) => (
-            <button key={p.label} className="fa-chip" onClick={() => addBlock(p)}>+ {p.label}</button>
+            <button key={p.label} className="fa-text" onClick={() => addBlock(p)}>+ {p.label} {p.start}–{p.end}</button>
           ))}
         </div>
       </div>

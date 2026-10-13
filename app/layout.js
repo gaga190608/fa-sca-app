@@ -3,7 +3,7 @@ import "./globals.css";
 export const metadata = {
   title: "Faísca 🔥",
   description: "Sua assistente de ideias: te mostra o caminho, não a resposta pronta — e te ajuda a decidir por onde começar.",
-  appleWebApp: { capable: true, title: "Faísca", statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: "Faísca", statusBarStyle: "black" },
 };
 
 // Inputs têm 16px, então o iPhone não dá zoom sozinho.
@@ -12,8 +12,8 @@ export const viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FFF6F1" },
-    { media: "(prefers-color-scheme: dark)", color: "#0E0706" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0B0A" },
   ],
 };
 

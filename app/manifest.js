@@ -6,8 +6,8 @@ export default function manifest() {
     description: "Assistente de ideias e organização.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0E0706",
-    theme_color: "#FF3D2E",
+    background_color: "#FFFFFF",
+    theme_color: "#0B0B0A",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

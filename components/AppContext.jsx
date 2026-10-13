@@ -21,7 +21,6 @@ export function AppProvider({ children }) {
   const [chats, setChats] = useState(loadChats);
   const [route, setRoute] = useState({ tab: "home", params: {}, key: 0 });
   const [toasts, setToasts] = useState([]);
-  const [sparkle, setSparkle] = useState(0);
   const [offline, setOffline] = useState(null); // null | kind do OfflineError
 
   const toast = useCallback((text) => {
@@ -46,8 +45,6 @@ export function AppProvider({ children }) {
     setRoute((r) => ({ tab, params, key: r.key + 1 }));
     window.scrollTo?.(0, 0);
   }, []);
-
-  const celebrate = useCallback(() => setSparkle((s) => s + 1), []);
 
   // energia vale só pro dia em que foi marcada
   const energy = profile.energy?.day === localISO() ? profile.energy.level : "ok";
@@ -81,10 +78,10 @@ export function AppProvider({ children }) {
     tasks, setTasks, addTasks, updateTask, toggleTask, removeTask,
     routine, setRoutine,
     chats, setChats, saveChat, removeChat,
-    route, go, toasts, toast, sparkle, celebrate,
+    route, go, toasts, toast,
     offline, markOffline: setOffline, markOnline: () => setOffline(null),
   }), [profile, energy, setEnergy, tasks, addTasks, updateTask, toggleTask, removeTask, routine, chats, saveChat, removeChat,
-    route, go, toasts, toast, sparkle, celebrate, offline]);
+    route, go, toasts, toast, offline]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

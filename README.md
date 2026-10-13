@@ -49,6 +49,7 @@ Diagnóstico: `/api/chat` (IA) e `/api/voice` (chaves de voz) abertos no navegad
 | `lib/storage.js` | Chaves `fa:profile|tasks|routine|chats` + backup |
 | `lib/speech.js` | `speak()`, `useVoiceInput()`, `recordUtterance()` (igual ao QuestHero) |
 | `components/AppContext.jsx` | Estado global (`useApp()`), navegação `go(tab, params)` |
-| `components/Brasa.jsx` | A "brasa" animada (só CSS) — idle, ouvindo, pensando, falando |
+| `DESIGN.md` | Sistema visual (Neon Brutalist): cores, tipos, componentes, o que não fazer |
+| `components/icons.jsx` | Ícones próprios (traço 2px) e a marca (asterisco) |
 | `components/screens/` | `Home`, `Chat`, `Organize` (+ `Routine`), `Call`, `Settings` |
-| `app/globals.css` | Tokens (escuro "brasa" + claro) e classes `fa-*` |
+| `app/globals.css` | Tokens (papel + noite) e classes `fa-*`, seguindo o `DESIGN.md` |
