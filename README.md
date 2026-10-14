@@ -23,7 +23,7 @@ Tudo fica no `localStorage` do aparelho (backup em Ajustes).
 ## Rodar
 
 ```bash
-cd faisca
+git clone https://github.com/gaga190608/faisca-app && cd faisca-app
 npm ci
 cp .env.example .env.local   # GROQ_API_KEY (e ELEVENLABS_API_KEYS pra voz) — opcionais
 npm run dev                   # http://localhost:3000
@@ -33,7 +33,7 @@ Verificação: `npm run lint` e `npm run build`.
 
 ## Publicar na Vercel
 
-Novo projeto apontando pra este mesmo repositório, com **Root Directory = `faisca`**.
+Importe este repositório na Vercel (Next.js, sem configuração extra).
 Variáveis: `GROQ_API_KEY` (pode ser a mesma do QuestHero) e, pra voz,
 `ELEVENLABS_API_KEYS` / `ELEVENLABS_VOICE_ID`.
 Diagnóstico: `/api/chat` (IA) e `/api/voice` (chaves de voz) abertos no navegador.
