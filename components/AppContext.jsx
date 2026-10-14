@@ -30,7 +30,7 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => { saveProfile(profile); }, [profile]);
-  useEffect(() => { if (!saveTasks(tasks)) toast("Não consegui salvar 😕 o armazenamento está cheio."); }, [tasks, toast]);
+  useEffect(() => { if (!saveTasks(tasks)) toast("Não consegui salvar: o armazenamento está cheio."); }, [tasks, toast]);
   useEffect(() => { saveRoutine(routine); }, [routine]);
   useEffect(() => { saveChats(chats); }, [chats]);
 

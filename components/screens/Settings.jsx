@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { useApp } from "@/components/AppContext";
 import { Icon } from "@/components/icons";
+import { Segmented, Switch } from "@/components/ui";
 import { exportBackup, parseBackup } from "@/lib/storage";
 import { speak, unlockAudio } from "@/lib/speech";
 
@@ -36,49 +37,59 @@ export default function Settings() {
   }
 
   return (
-    <main className="fa-screen">
-      <section className="fa-hero">
-        <span className="fa-kicker">Ajustes</span>
-        <h1 className="fa-display">Do <i>seu</i> jeito.</h1>
-      </section>
+    <main className="fa-screen fa-wrap" style={{ paddingTop: 18, paddingBottom: 24 }}>
+      <h1 className="fa-title">Ajustes</h1>
 
-      <label className="fa-label" htmlFor="nm2">Seu nome</label>
-      <input id="nm2" className="fa-field" value={name} onChange={(e) => setName(e.target.value)}
-        onBlur={() => setProfile((p) => ({ ...p, name: name.trim() }))} placeholder="Como a Faísca te chama" />
+      <p className="fa-group-title">Você</p>
+      <ul className="fa-list">
+        <li className="fa-row">
+          <label htmlFor="nm2" style={{ flexShrink: 0 }}>Nome</label>
+          <input id="nm2" className="fa-inline-input" style={{ textAlign: "right", color: "var(--ink-2)" }} value={name}
+            onChange={(e) => setName(e.target.value)} onBlur={() => setProfile((p) => ({ ...p, name: name.trim() }))} placeholder="Como a Faísca te chama" />
+        </li>
+      </ul>
 
-      <label className="fa-label">Tema</label>
-      <div className="fa-seg" role="radiogroup" aria-label="Tema">
-        {[["auto", "Automático"], ["light", "Papel"], ["dark", "Noite"]].map(([k, v]) => (
-          <button key={k} role="radio" aria-checked={profile.theme === k} className={profile.theme === k ? "on" : ""}
-            onClick={() => setProfile((p) => ({ ...p, theme: k }))}>{v}</button>
-        ))}
-      </div>
+      <p className="fa-group-title">Aparência</p>
+      <Segmented label="Aparência" value={profile.theme} onChange={(v) => setProfile((p) => ({ ...p, theme: v }))}
+        options={[{ value: "auto", label: "Automático" }, { value: "light", label: "Claro" }, { value: "dark", label: "Escuro" }]} />
 
-      <h2 className="fa-h2"><span>Voz</span></h2>
-      <div className="fa-setrow">
-        <span>Ler as respostas em voz alta sozinha</span>
-        <button className={`fa-toggle ${profile.autoSpeak ? "on" : ""}`} role="switch" aria-checked={profile.autoSpeak}
-          aria-label="Ler as respostas em voz alta"
-          onClick={() => { unlockAudio(); setProfile((p) => ({ ...p, autoSpeak: !p.autoSpeak })); }}><span /></button>
-      </div>
-      <div className="fa-setrow">
-        <span>Ouvir a voz da Faísca</span>
-        <button className="fa-line" onClick={() => { unlockAudio(); speak(`Oi${profile.name ? `, ${profile.name}` : ""}! Eu sou a Faísca. Bora acender umas ideias?`); }}>
-          <Icon name="speaker" size={16} /> Testar
-        </button>
-      </div>
+      <p className="fa-group-title">Voz</p>
+      <ul className="fa-list">
+        <li className="fa-row">
+          <span className="fa-row-main">Ler respostas em voz alta</span>
+          <Switch on={profile.autoSpeak} label="Ler respostas em voz alta" onChange={(v) => { unlockAudio(); setProfile((p) => ({ ...p, autoSpeak: v })); }} />
+        </li>
+        <li style={{ padding: 0 }}>
+          <button className="fa-row fa-row-btn" onClick={() => { unlockAudio(); speak(`Oi${profile.name ? `, ${profile.name}` : ""}! Eu sou a Faísca. Bora acender umas ideias?`); }}>
+            <span className="fa-row-main" style={{ color: "var(--accent-ink)" }}>Ouvir a voz da Faísca</span>
+            <Icon name="speaker" size={20} className="fa-row-chev" />
+          </button>
+        </li>
+      </ul>
 
-      <h2 className="fa-h2"><span>Seus dados</span></h2>
-      <p className="fa-note">Tudo fica só neste aparelho. Faz um backup pra levar pra outro celular.</p>
-      <div className="fa-plan-actions">
-        <button className="fa-line" onClick={download}>Baixar backup</button>
-        <button className="fa-line" onClick={() => fileRef.current?.click()}>Restaurar</button>
-        <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => { restore(e.target.files?.[0]); e.target.value = ""; }} />
-        <button className="fa-line danger" onClick={() => window.confirm("Apagar todas as conversas?") && app.setChats([])}>Apagar conversas</button>
-      </div>
+      <p className="fa-group-title">Seus dados</p>
+      <ul className="fa-list">
+        <li style={{ padding: 0 }}>
+          <button className="fa-row fa-row-btn" onClick={download}>
+            <span className="fa-row-main">Baixar backup</span><Icon name="chevron" size={16} className="fa-row-chev" />
+          </button>
+        </li>
+        <li style={{ padding: 0 }}>
+          <button className="fa-row fa-row-btn" onClick={() => fileRef.current?.click()}>
+            <span className="fa-row-main">Restaurar backup</span><Icon name="chevron" size={16} className="fa-row-chev" />
+          </button>
+          <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => { restore(e.target.files?.[0]); e.target.value = ""; }} />
+        </li>
+        <li style={{ padding: 0 }}>
+          <button className="fa-row fa-row-btn" onClick={() => window.confirm("Apagar todas as conversas?") && app.setChats([])}>
+            <span className="fa-row-main" style={{ color: "var(--accent-ink)" }}>Apagar conversas</span>
+          </button>
+        </li>
+      </ul>
+      <p className="fa-caption" style={{ marginLeft: 16 }}>Tudo fica só neste aparelho. Faça um backup pra levar pra outro celular.</p>
 
-      <section className="fa-about">
-        <span className="fa-kicker">Como a Faísca pensa</span>
+      <section className="fa-about fa-reveal">
+        <b><span className="fa-spark-text">Como a Faísca pensa.</span></b>
         <p>Quando você pede ideias, ela não entrega a resposta: mostra os passos do caminho e te devolve uma pergunta. Na hora de se organizar, aí sim ela diz por onde começar — olhando seus prazos, sua energia e sua rotina.</p>
       </section>
     </main>

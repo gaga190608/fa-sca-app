@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useApp } from "@/components/AppContext";
 import { Icon } from "@/components/icons";
+import { Segmented } from "@/components/ui";
 import { uid } from "@/lib/storage";
 import { PEAKS, WEEK, busyBlocks, freeWindows, nowMin, toMin, toHHMM, formatDuration } from "@/lib/routine";
 
@@ -14,35 +15,37 @@ const PRESETS = [
   { label: "Academia", start: "18:00", end: "19:00", days: [1, 3, 5] },
   { label: "Curso", start: "19:00", end: "21:00", days: [2, 4] },
 ];
+const DAY_NAMES = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 
-// Linha do dia: compromissos (preto), livre (papel) e o "agora" (vermelho).
-function DayStrip({ routine }) {
+// O dia de hoje numa linha: compromissos, tempo livre e o "agora".
+function Today({ routine }) {
   const wake = toMin(routine.wake), sleep = toMin(routine.sleep) || 1440;
   const span = Math.max(60, sleep - wake);
   const pct = (m) => ((Math.min(Math.max(m, wake), sleep) - wake) / span) * 100;
   const m = nowMin();
   const left = freeWindows(routine, m).reduce((a, w) => a + (w.e - w.s), 0);
   return (
-    <>
+    <div className="fa-day">
+      <small className="fa-eyebrow">Livre no resto de hoje</small>
+      <div className="fa-day-big">{formatDuration(left)}</div>
       <div className="fa-strip" role="img" aria-label={`Seu dia de ${routine.wake} a ${routine.sleep}`}>
         {busyBlocks(routine).map((b) => (
           <span key={b.id} className="busy" style={{ left: `${pct(b.s)}%`, width: `${pct(b.e) - pct(b.s)}%` }} title={`${b.label} ${b.start}–${b.end}`}>
-            <em>{b.label}</em>
+            {b.label}
           </span>
         ))}
         {m >= wake && m <= sleep && <span className="now" style={{ left: `${pct(m)}%` }} />}
       </div>
-      <div className="fa-strip-scale fa-mono"><span>{routine.wake}</span><span>{routine.sleep}</span></div>
-      <div className="fa-left"><b>{formatDuration(left)}</b><span className="fa-mono" style={{ color: "var(--muted)" }}>livres no resto de hoje</span></div>
-    </>
+      <div className="fa-strip-scale"><span>{routine.wake}</span><span>{routine.sleep}</span></div>
+    </div>
   );
 }
 
 function Days({ days, onToggle }) {
   return (
-    <div className="fa-days">
+    <div className="fa-days" role="group" aria-label="Dias da semana">
       {WEEK.map((d, i) => (
-        <button key={i} className={days.includes(i) ? "on" : ""} aria-pressed={days.includes(i)} onClick={() => onToggle(i)}>{d}</button>
+        <button key={i} className={days.includes(i) ? "on" : ""} aria-pressed={days.includes(i)} aria-label={DAY_NAMES[i]} onClick={() => onToggle(i)}>{d}</button>
       ))}
     </div>
   );
@@ -65,63 +68,68 @@ export default function Routine() {
   const draftBad = draft.label.trim() && toMin(draft.end) <= toMin(draft.start);
 
   return (
-    <div>
-      <DayStrip routine={routine} />
+    <div style={{ paddingBottom: 24 }}>
+      <Today routine={routine} />
 
-      <div className="fa-times">
-        <label><span className="fa-mono">acordo</span>
-          <input type="time" value={routine.wake} onChange={(e) => e.target.value && set({ wake: e.target.value })} />
-        </label>
-        <label><span className="fa-mono">durmo</span>
-          <input type="time" value={routine.sleep} onChange={(e) => e.target.value && set({ sleep: e.target.value })} />
-        </label>
-      </div>
-
-      <label className="fa-label">Quando você rende mais?</label>
-      <div className="fa-seg" role="radiogroup" aria-label="Quando você rende mais">
-        {Object.entries(PEAKS).map(([k, v]) => (
-          <button key={k} role="radio" aria-checked={routine.peak === k} className={routine.peak === k ? "on" : ""} onClick={() => set({ peak: k })}>{v}</button>
-        ))}
-      </div>
-
-      <h2 className="fa-h2"><span>Compromissos fixos</span><span style={{ color: "var(--muted)" }}>{routine.blocks.length}</span></h2>
-      {routine.blocks.length === 0 && <p className="fa-note">Coisas que já têm horário: escola, trabalho, curso, academia…</p>}
-      <ul className="fa-blocks">
-        {routine.blocks.map((b) => (
-          <li key={b.id} className="fa-block">
-            <div className="fa-block-top">
-              <input className="fa-inline" value={b.label} aria-label="Nome" onChange={(e) => setBlock(b.id, { label: e.target.value })} />
-              <input type="time" value={b.start} aria-label="Começa" onChange={(e) => e.target.value && setBlock(b.id, { start: e.target.value })} />
-              <input type="time" value={b.end} aria-label="Termina" onChange={(e) => e.target.value && setBlock(b.id, { end: e.target.value })} />
-              <button className="fa-text" aria-label={`Apagar ${b.label}`} onClick={() => set({ blocks: routine.blocks.filter((x) => x.id !== b.id) })}><Icon name="x" size={14} /></button>
-            </div>
-            <Days days={b.days} onToggle={(i) => setBlock(b.id, { days: toggleDay(b.days, i) })} />
-          </li>
-        ))}
+      <p className="fa-group-title">Seu dia</p>
+      <ul className="fa-list">
+        <li className="fa-row">
+          <label htmlFor="wake" className="fa-row-main">Acordo</label>
+          <input id="wake" className="fa-time" type="time" value={routine.wake} onChange={(e) => e.target.value && set({ wake: e.target.value })} />
+        </li>
+        <li className="fa-row">
+          <label htmlFor="sleep" className="fa-row-main">Durmo</label>
+          <input id="sleep" className="fa-time" type="time" value={routine.sleep} onChange={(e) => e.target.value && set({ sleep: e.target.value })} />
+        </li>
       </ul>
 
-      <div className="fa-newblock">
+      <p className="fa-group-title">Quando você rende mais</p>
+      <Segmented label="Quando você rende mais" value={routine.peak} onChange={(v) => set({ peak: v })}
+        options={Object.entries(PEAKS).map(([k, v]) => ({ value: k, label: v.charAt(0).toUpperCase() + v.slice(1) }))} />
+
+      <p className="fa-group-title">Compromissos fixos</p>
+      {routine.blocks.length > 0 && (
+        <ul className="fa-list" style={{ marginBottom: 12 }}>
+          {routine.blocks.map((b) => (
+            <li key={b.id} className="fa-block">
+              <div className="fa-block-top">
+                <input className="fa-inline-input" value={b.label} aria-label="Nome do compromisso" onChange={(e) => setBlock(b.id, { label: e.target.value })} />
+                <input className="fa-time" type="time" value={b.start} aria-label={`${b.label} começa`} onChange={(e) => e.target.value && setBlock(b.id, { start: e.target.value })} />
+                <input className="fa-time" type="time" value={b.end} aria-label={`${b.label} termina`} onChange={(e) => e.target.value && setBlock(b.id, { end: e.target.value })} />
+                <button className="fa-icon-btn" aria-label={`Apagar ${b.label}`} onClick={() => set({ blocks: routine.blocks.filter((x) => x.id !== b.id) })}>
+                  <Icon name="trash" size={18} />
+                </button>
+              </div>
+              <Days days={b.days} onToggle={(i) => setBlock(b.id, { days: toggleDay(b.days, i) })} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="fa-list fa-block">
         <div className="fa-block-top">
-          <input className="fa-inline" value={draft.label} placeholder="Novo compromisso" aria-label="Nome do compromisso"
+          <input className="fa-inline-input" value={draft.label} placeholder="Novo compromisso" aria-label="Nome do novo compromisso"
             onChange={(e) => setDraft({ ...draft, label: e.target.value })} onKeyDown={(e) => e.key === "Enter" && addBlock()} />
-          <input type="time" value={draft.start} aria-label="Começa" onChange={(e) => setDraft({ ...draft, start: e.target.value })} />
-          <input type="time" value={draft.end} aria-label="Termina" onChange={(e) => setDraft({ ...draft, end: e.target.value })} />
+          <input className="fa-time" type="time" value={draft.start} aria-label="Novo compromisso começa" onChange={(e) => setDraft({ ...draft, start: e.target.value })} />
+          <input className="fa-time" type="time" value={draft.end} aria-label="Novo compromisso termina" onChange={(e) => setDraft({ ...draft, end: e.target.value })} />
         </div>
         <Days days={draft.days} onToggle={(i) => setDraft({ ...draft, days: toggleDay(draft.days, i) })} />
-        {draftBad && <p className="fa-note" style={{ color: "var(--hot)" }}>O fim precisa ser depois do começo.</p>}
-        <button className="fa-btn" style={{ marginTop: 12 }} disabled={!draft.label.trim() || draftBad} onClick={() => addBlock()}>Adicionar</button>
+        {draftBad && <p className="fa-caption" style={{ color: "var(--accent-ink)" }}>O fim precisa ser depois do começo.</p>}
+        <button className="fa-btn fa-press" style={{ marginTop: 12, minHeight: 40, fontSize: 15 }} disabled={!draft.label.trim() || draftBad} onClick={() => addBlock()}>
+          Adicionar
+        </button>
         <div className="fa-presets">
           {PRESETS.filter((p) => !routine.blocks.some((b) => b.label === p.label)).map((p) => (
-            <button key={p.label} className="fa-text" onClick={() => addBlock(p)}>+ {p.label} {p.start}–{p.end}</button>
+            <button key={p.label} className="fa-press" onClick={() => addBlock(p)}>{p.label} {p.start}–{p.end}</button>
           ))}
         </div>
       </div>
 
-      <label className="fa-label" htmlFor="rn">Algo mais sobre seu dia?</label>
+      <p className="fa-group-title"><label htmlFor="rn">Algo mais sobre seu dia</label></p>
       <textarea id="rn" className="fa-field" rows={3} value={routine.notes} maxLength={400}
         placeholder="Ex.: chego cansada da escola; à noite cuido do meu irmão; quarta é corrida"
         onChange={(e) => set({ notes: e.target.value })} />
-      <p className="fa-note">A Faísca usa isso pra sugerir a ordem das suas tarefas.</p>
+      <p className="fa-caption" style={{ marginLeft: 16 }}>A Faísca usa isso pra sugerir a ordem das suas tarefas.</p>
     </div>
   );
 }

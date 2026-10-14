@@ -1,66 +1,83 @@
-# Faísca — Neon Brutalist (remix: The Verge × caderno de anotações)
+# Faísca — estilo Apple, com a faísca no lugar do azul
 
-Sistema visual do app. Base: família **Neon Brutalist** do
-[awesome-claude-design](https://github.com/rohitg00/awesome-claude-design) (`design-md/brutalist/the-verge.md`),
-escolhida pelo picker do repo: produto de leitura (conversa), pessoa comum, marca que precisa parecer corajosa.
+Sistema visual do app. Base: `design-systems/library/apple/DESIGN.md` e `taste/motion-choreography.md`
+do kit [ux-ui-agent-skills (XIAS)](https://github.com/plugin87/ux-ui-agent-skills).
+A troca principal: a Apple usa **um** azul de ação; o Faísca usa **uma** família vermelho → laranja (a faísca).
 
 ## 1. Atmosfera
 
-Decidida, direta, sem pedir desculpa — como uma professora que acredita em você.
-Papel branco, tinta preta e **um** laranja que acende. A conversa parece uma página editorial:
-a Faísca fala em serifa (citação), o caminho vem em passos numerados com numerais enormes.
+Calma de galeria com capítulos de cinema: um herói preto com luz se movendo atrás do título,
+seguido de campos cinza-claro (`#f5f5f7`) com cartões brancos. A interface some; o que aparece
+é a conversa, os passos e o dia dela.
 
 ## 2. Cores e papéis
 
 ```
---bg        #FFFFFF   papel            (escuro: #0B0B0A)
---ink       #0B0B0A   tinta            (escuro: #F4F2EC)
---bar       #0B0B0A   barra do topo / seções invertidas
---accent    #FF5F00   ÚNICA cor de ação: botão principal, aba ativa, numerais do caminho, pergunta
---on-accent #0B0B0A   texto sobre laranja (preto, nunca branco)
---hot       #E5251B   UM papel semântico: urgente/atrasada, gravando, desligar, linha do "agora"
---muted     #66645E   texto secundário
---rule      = --ink   regras de 2px
---wash      #F1EFEA   troca tonal (hover, faixa livre da rotina)
+Neutros (Apple)
+--bg        #F5F5F7  capítulo claro         escuro: #000000
+--canvas    #FFFFFF  cartões e listas       escuro: #1C1C1E
+--ink       #1D1D1F  texto (nunca #000)     escuro: #F5F5F7
+--ink-2     #6E6E73  texto secundário       escuro: #98989D
+--ink-chip  #636366  texto sobre chip/trilho escuro: #AEAEB2
+--hair      #D2D2D7  divisórias de 0,5px    escuro: #38383A
+--night     #000000  capítulos pretos (herói, ligação)
+--night-card #000000 cartões pretos          escuro: #1C1C1E (pra não sumir no fundo)
+
+A faísca (a única cor de ação)
+--accent      #D6301A  botões e balão dela — texto branco 4,89:1
+--accent-ink  #C42D12  links/destaque em fundo claro   escuro: #FF7A45
+--spark       #FF453A → #FF6A2B → #FF9F0A   SÓ em título grande sobre preto
+--spark-ring  #FF2D55 #FF3B30 #FF9500 #FFCC00 (cores do sistema da Apple) — o brilho
 ```
 
-Vermelho e laranja nunca competem: laranja = "faça", vermelho = "atenção agora".
+Regra: a faísca nunca vira segunda cor; não existe azul, verde ou roxo na interface.
 
 ## 3. Tipografia
 
-- **Display:** Archivo, peso 800, largura 112–125 (expandida), tracking −2%. Escala 13/16/20/28/44/68.
-- **Voz da Faísca / ênfase:** Instrument Serif (itálico permitido) — a tensão serifa × sem-serifa é a estética.
-- **Corpo/UI:** Archivo 400–700, largura 100.
-- **Numerais, horários, rótulos:** JetBrains Mono, caixa alta, tracking +8%, tabular.
-- Inputs com 16px (iPhone não dá zoom).
+- `-apple-system` primeiro: no iPhone/Mac é a própria **SF Pro** (Display nos títulos, Text no corpo).
+  Em outros aparelhos: **Inter Tight** (títulos) e **Inter** (texto) — o substituto indicado pelo kit.
+- Herói: 40–64px, peso 600, entrelinha 1,04, tracking −3,5%. Seção: 28–40px "Agora. *Seu dia num relance.*"
+  (frase em duas cores: tinta + cinza, como nas páginas da Apple). Título de tela: 34px peso 700 (Large Title do iOS).
+- Corpo 17px / 1,47, tracking −2,2%. Legenda 13px. Inputs com 16–17px (iPhone não dá zoom).
 
 ## 4. Componentes
 
-- **Botões:** raio 0. Primário = laranja + texto preto, caixa alta, peso 700. Hover/pressionado: inverte (preto + branco), sem transição.
-  Secundário = 2px de borda na cor da tinta.
-- **Itens / listas:** sem cartão. Itens separados por regras de 2px.
-- **Campos:** 2px de borda, raio 0; foco = borda laranja.
-- **O caminho:** numerais mono grandes (01, 02…) numa coluna; marcar um passo pinta o numeral de laranja.
-- **A pergunta:** faixa laranja de largura total, texto preto em serifa.
-- **Seções invertidas:** o plano "comece por" e a ligação são blocos pretos (no escuro, invertem pro papel).
-- **Ícones:** família própria (`components/icons.jsx`): traço 2px, pontas retas, grade 24. Onde der, só texto.
-- **Marca:** asterisco de 8 raios (`Mark`), estático.
+- **Raios por função** (nunca um só): 8 (campos de hora), 10 (segmentado), 12 (campos), 18 (listas),
+  22–24 (campo de conversa), 28 (cartões bento, plano), 980 (pílulas), 50% (círculos).
+- **Botões:** pílula. Primário = faísca + branco. Sobre preto = pílula clara (`#F5F5F7` + tinta).
+  Pressionar = `scale(.97)`.
+- **Barras:** vidro (`saturate(180%) blur(20px)`) — barra global em cima (preta na tela inicial),
+  barra de abas embaixo como no iPhone.
+- **Listas agrupadas do iOS:** fundo branco, divisória de 0,5px recuada 16px. Tarefas e passos
+  com **círculo de concluir** do app Lembretes (enche com a faísca e o check entra com mola).
+- **Controle segmentado do iOS:** o marcador desliza (300ms).
+- **Bento:** cartões de 28px em grade de 2 (1 coluna abaixo de 340px).
+- **Ícones:** próprios, no espírito dos SF Symbols (`components/icons.jsx`, traço 1,8, pontas redondas).
+  **Zero emoji** em qualquer texto.
 
-## 5. Layout
+## 5. Movimento (o "graphic motion")
 
-Coluna única até 640px. Barra preta de largura total no topo, abas embaixo divididas por regra de 2px.
-Profundidade de caixas no máximo 2 (seção › item).
+Um movimento-assinatura por tela; o resto fica quieto (kit: *restraint reads as premium*).
 
-## 6. Profundidade
+| Tela | Assinatura | Como |
+|---|---|---|
+| Início | manchas de luz vermelho/laranja/rosa/âmbar flutuando atrás do título; título entra palavra por palavra | `transform` em loop lento (14–19s), entrada 600ms com 70ms entre palavras |
+| Conversa | **brilho "inteligência"**: anel de gradiente girando em volta do campo enquanto ela pensa; texto "Pensando no caminho…" com brilho passando | `@property --fa-angle` + `conic-gradient`; anel mascarado + cópia desfocada atrás |
+| Organizar | o plano entra subindo, a linha do tempo em cascata (60ms) | `fa-enter` 400ms |
+| Ligação | **estilo Siri**: borda da tela acesa com o gradiente girando, esfera de luz que cresce com a voz | `--lvl` (0–1) do microfone vira `scale` e opacidade |
+| Rolagem | blocos sobem ao entrar na tela | `animation-timeline: view()` (sem JS) |
 
-Plana. Zero sombra, zero blur, zero gradiente. Profundidade = regra de 2px, inversão e contraste de tamanho.
+Regras: só `transform`/`opacity` (e o ângulo do brilho); rotinas ≤ 300ms, herói ≤ 600ms;
+`prefers-reduced-motion` desliga tudo — e **nada depende de animação pra aparecer**.
 
-## 7. Movimento
+## 6. Verificação (refaça antes de dizer que está pronto)
 
-Só quando comunica estado: o medidor de voz na ligação (barras reagem ao volume), o "digitando" da resposta.
-Nada de partículas, brilho pulsando ou flutuação. Respeita `prefers-reduced-motion`.
+Critérios do kit, medidos no app renderizado (claro, escuro e com "reduzir movimento"):
+sem estouro lateral em 280/320/414px · alvo de toque ≥ 24px · contraste real de todo texto
+(4,5:1; 3:1 em texto grande) · nenhuma animação nem texto invisível com movimento reduzido · zero emoji.
+Gates provam o objetivo, não o gosto: olhe os prints também.
 
-## 8. Não fazer
+## 7. Não fazer
 
-Cantos arredondados · sombras · gradientes · segunda cor de ação · emoji como ícone · Lucide ·
-"bolinha de status" piscando · cartão dentro de cartão · regra lateral colorida decorativa.
+Segunda cor de ação · gradiente em texto pequeno ou sobre fundo claro · `#000` como cor de texto ·
+um raio só pra tudo · sombra pesada · animar `width/height/top/box-shadow` · emoji · ícone de biblioteca genérica.

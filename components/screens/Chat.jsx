@@ -80,37 +80,51 @@ export default function Chat() {
 
   return (
     <main className="fa-screen fa-chatscreen">
-      <div className="fa-chathead">
-        <button onClick={() => go("home")} aria-label="Voltar"><Icon name="left" size={16} /> voltar</button>
-        <span className="fa-word"><Mark size={15} /> Faísca</span>
-        <button onClick={() => go("call", { history: messages })} aria-label="Continuar por voz"><Icon name="phone" size={16} /> ligar</button>
+      <div className="fa-navbar">
+        <button className="fa-link" onClick={() => go("home")}><Icon name="back" size={22} /> Início</button>
+        <span className="fa-navbar-title"><Mark size={18} /> Faísca</span>
+        <button className="fa-round" style={{ color: "var(--accent-ink)" }} aria-label="Continuar por voz" onClick={() => go("call", { history: messages })}>
+          <Icon name="phone" size={20} />
+        </button>
       </div>
 
       <div className="fa-chat" ref={scrollRef}>
-        <OfflineBanner />
-        {messages.length === 0 && !loading && (
-          <div className="fa-empty">
-            <p className="fa-lead">Me conta o que você quer resolver, criar ou organizar.</p>
-          </div>
-        )}
-        {messages.map((m, i) =>
-          m.role === "user" ? (
-            <div key={i} className="fa-me">{m.content}</div>
-          ) : (
-            <div key={i} className="fa-ai">
-              <span className="fa-kicker">Faísca</span>
-              <p className="fa-say">{m.content}</p>
-              <PathSteps steps={m.steps} checked={m.checked} onToggle={(s) => toggleStep(i, s)} onToTasks={() => toTasks(m)} />
-              {m.ask && <div className="fa-question"><span className="fa-mono">Pra você pensar</span>{m.ask}</div>}
-              <div className="fa-tools"><SpeakButton text={spoken(m)} /></div>
+        <div className="fa-chat-in">
+          <OfflineBanner />
+          {messages.length === 0 && !loading && (
+            <div className="fa-empty">
+              <h1 className="fa-section">Me conta. <span>O que você quer resolver, criar ou organizar?</span></h1>
             </div>
-          )
-        )}
-        {loading && <div className="fa-typing">pensando no caminho<span>_</span></div>}
+          )}
+          {messages.map((m, i) =>
+            m.role === "user" ? (
+              <div key={i} className="fa-me">{m.content}</div>
+            ) : (
+              <div key={i} className="fa-ai">
+                <div className="fa-ai-who"><Mark size={14} /> Faísca</div>
+                <p className="fa-ai-text">{m.content}</p>
+                <PathSteps steps={m.steps} checked={m.checked} onToggle={(s) => toggleStep(i, s)} onToTasks={() => toTasks(m)} />
+                {m.ask && (
+                  <div className="fa-question">
+                    <small><Icon name="sparkle" size={15} /> Pra você pensar</small>
+                    <p>{m.ask}</p>
+                  </div>
+                )}
+                <div className="fa-tools"><SpeakButton text={spoken(m)} /></div>
+              </div>
+            )
+          )}
+          {loading && (
+            <div className="fa-typing" role="status">
+              <div className="fa-ai-who"><Mark size={14} /> Faísca</div>
+              <span className="fa-thinking">Pensando no caminho…</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="fa-chatfoot">
-        <Composer value={text} onChange={setText} onSend={send} disabled={loading} placeholder="Responde ou pergunta…" />
+        <Composer value={text} onChange={setText} onSend={send} disabled={loading} thinking={loading} placeholder="Responde ou pergunta…" />
       </div>
     </main>
   );

@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useApp } from "@/components/AppContext";
-import { Icon, Mark } from "@/components/icons";
+import { Icon } from "@/components/icons";
 import { buildCallSystem, callFaisca, toHistory, OfflineError } from "@/lib/ai";
 import {
   speak, stopSpeaking, prefetchVoice, unlockAudio, recordUtterance, transcribe,
@@ -18,12 +18,12 @@ import {
 
 const STATUS = {
   connecting: "Ligando…",
-  listening: "Tô ouvindo.",
+  listening: "Pode falar.",
   hearing: "Ouvindo…",
   transcribing: "Entendendo…",
   thinking: "Pensando no caminho…",
-  speaking: "Falando.",
-  paused: "Microfone pausado.",
+  speaking: "Falando",
+  paused: "Microfone desligado",
 };
 
 const clock = (ms) => {
@@ -138,7 +138,7 @@ export default function Call() {
     ctxRef.current = AC ? new AC() : null;
     await ctxRef.current?.resume?.();
     if (!ctxRef.current && !canDictate()) {
-      setError("Seu navegador não deixa usar o microfone aqui 😕");
+      setError("Seu navegador não deixa usar o microfone aqui.");
       return;
     }
     const tt = topic.trim();
@@ -190,21 +190,24 @@ export default function Call() {
   if (phase === "intro") {
     return (
       <main className="fa-call">
-        <div className="fa-call-top">
-          <button className="fa-text" style={{ color: "inherit" }} onClick={() => go("home")}><Icon name="left" size={14} /> voltar</button>
-          <span className="fa-word"><Mark size={16} /> Faísca</span>
-        </div>
-        <div className="fa-call-main">
-          <span className="fa-kicker">Ligação</span>
-          <h1 className="fa-display" style={{ marginTop: 10 }}>Fala que eu <i>escuto</i>.</h1>
-          <p className="fa-lead">Você fala, faz uma pausa, e a Faísca responde em voz alta — sempre te devolvendo uma pergunta.</p>
+        <div className="fa-call-in">
+          <div className="fa-call-top">
+            <button className="fa-link" onClick={() => go("home")}><Icon name="back" size={22} /> Início</button>
+          </div>
+          <div className="fa-orb-wrap"><Orb mode="idle-intro" level={0} /></div>
+          <p className="fa-eyebrow" style={{ color: "var(--night-ink-2)" }}>Ligação</p>
+          <h1 className="fa-hero-title fa-word-in">
+            <span>Fala</span> <span style={{ animationDelay: "70ms" }}>que</span> <span style={{ animationDelay: "140ms" }}>eu</span>{" "}
+            <span className="fa-spark-text" style={{ animationDelay: "210ms" }}>escuto.</span>
+          </h1>
+          <p className="fa-sub" style={{ color: "var(--night-ink-2)" }}>Você fala, faz uma pausa, e a Faísca responde em voz alta — sempre te devolvendo uma pergunta.</p>
           {!fromChat.length && (
             <input className="fa-call-field" value={topic} onChange={(e) => setTopic(e.target.value)} aria-label="Assunto"
               placeholder="Sobre o quê? (opcional)" onKeyDown={(e) => e.key === "Enter" && startCall()} />
           )}
           {error && <div className="fa-error">{error}</div>}
-          <button className="fa-go" onClick={startCall}>Ligar agora <Icon name="phone" size={26} /></button>
-          <p className="fa-note" style={{ color: "inherit", opacity: 0.6 }}>O navegador vai pedir permissão pro microfone.</p>
+          <button className="fa-call-go fa-press" onClick={startCall}><Icon name="phone" size={22} /> Ligar agora</button>
+          <p className="fa-caption" style={{ color: "var(--night-ink-2)", textAlign: "center" }}>O navegador vai pedir permissão pro microfone.</p>
         </div>
       </main>
     );
@@ -213,18 +216,19 @@ export default function Call() {
   if (phase === "ended") {
     return (
       <main className="fa-call">
-        <div className="fa-call-top">
-          <span className="fa-mono">Encerrada · {clock(endedAt - startedAt)}</span>
-          <span className="fa-word"><Mark size={16} /> Faísca</span>
-        </div>
-        <h1 className="fa-display" style={{ marginTop: 24 }}>Boa <i>conversa</i>.</h1>
-        <div className="fa-transcript">
-          {lines.map((l, i) => <p key={i} className={l.who === "eu" ? "me" : ""}><b>{l.who === "eu" ? "Você" : "Faísca"}:</b> {l.text}</p>)}
-        </div>
-        <div className="fa-plan-actions">
-          <button className="fa-btn" onClick={startCall}>Ligar de novo</button>
-          {lines.length > 1 && <button className="fa-line" onClick={toChat}>Continuar escrevendo</button>}
-          <button className="fa-text" style={{ color: "inherit" }} onClick={() => go("home")}>início</button>
+        <div className="fa-call-in">
+          <div className="fa-call-top">
+            <span className="fa-call-time">Ligação encerrada · {clock(endedAt - startedAt)}</span>
+          </div>
+          <h1 className="fa-hero-title" style={{ marginTop: 24 }}>Boa <span className="fa-spark-text">conversa.</span></h1>
+          <div className="fa-transcript">
+            {lines.map((l, i) => <p key={i} className={l.who === "eu" ? "me" : ""}><b>{l.who === "eu" ? "Você" : "Faísca"}:</b> {l.text}</p>)}
+          </div>
+          <div className="fa-plan-actions">
+            <button className="fa-btn fa-btn-light fa-press" onClick={startCall}>Ligar de novo</button>
+            {lines.length > 1 && <button className="fa-link" style={{ color: "var(--night-accent)" }} onClick={toChat}>Continuar escrevendo</button>}
+            <button className="fa-link" style={{ color: "var(--night-accent)" }} onClick={() => go("home")}>Início</button>
+          </div>
         </div>
       </main>
     );
@@ -234,42 +238,45 @@ export default function Call() {
   const speaking = !paused && status === "speaking";
   const lastFa = [...lines].reverse().find((l) => l.who === "fa");
   const lastMe = [...lines].reverse().find((l) => l.who === "eu");
+  const mode = paused ? "idle" : speaking ? "speak" : listening ? "listen" : "think";
 
   return (
     <main className="fa-call">
-      <div className="fa-call-top">
-        <span className="fa-mono" data-tick={tick}>{clock(Date.now() - startedAt)}</span>
-        <span className="fa-word"><Mark size={16} /> Faísca</span>
-      </div>
-      <div className="fa-call-main">
-        <h1 className="fa-display" aria-live="polite">{paused ? STATUS.paused : STATUS[status]}</h1>
-        <Meter level={listening ? level : 0} mode={listening ? "on" : speaking ? "speak" : ""} />
-      </div>
-      <div className="fa-captions">
-        {lastMe && <p className="me">{lastMe.text}</p>}
-        {lastFa && <p>{lastFa.text}</p>}
-      </div>
-      {error && <div className="fa-error">{error}</div>}
-      <div className="fa-callbar">
-        <button className={paused ? "off" : ""} aria-label={paused ? "Ligar microfone" : "Pausar microfone"} onClick={togglePause}>
-          <Icon name={paused ? "mic" : "pause"} size={18} /> {paused ? "voltar" : "pausar"}
-        </button>
-        <button className="end" aria-label="Desligar" onClick={() => hangUp()}><Icon name="hang" size={22} /> desligar</button>
-        <button aria-label="Pular a fala" disabled={!speaking} onClick={stopSpeaking}><Icon name="skip" size={18} /> pular</button>
+      <div className={`fa-edge ${paused ? "" : "on"}`} style={{ "--lvl": listening ? level : speaking ? 0.6 : 0.2 }} aria-hidden="true" />
+      <div className="fa-call-in">
+        <div className="fa-call-top">
+          <span className="fa-call-time" data-tick={tick}>{clock(Date.now() - startedAt)}</span>
+          <span className="fa-call-time">Faísca</span>
+        </div>
+        <div className="fa-orb-wrap"><Orb mode={mode} level={listening ? level : speaking ? 0.35 : 0} /></div>
+        <h1 className="fa-call-status" aria-live="polite">{paused ? STATUS.paused : STATUS[status]}</h1>
+        <div className="fa-captions">
+          {lastMe && <p className="me">{lastMe.text}</p>}
+          {lastFa && <p>{lastFa.text}</p>}
+        </div>
+        {error && <div className="fa-error">{error}</div>}
+        <div className="fa-callbar">
+          <button className={paused ? "on" : ""} aria-pressed={paused} onClick={togglePause}>
+            <span className="disc fa-press"><Icon name={paused ? "micOff" : "mic"} size={28} /></span>{paused ? "Mudo" : "Microfone"}
+          </button>
+          <button className="end" onClick={() => hangUp()}>
+            <span className="disc fa-press"><Icon name="hang" size={30} /></span>Encerrar
+          </button>
+          <button disabled={!speaking} onClick={stopSpeaking}>
+            <span className="disc fa-press"><Icon name="forward" size={26} /></span>Pular
+          </button>
+        </div>
       </div>
     </main>
   );
 }
 
-// Medidor de voz: ouvindo = barras seguem o volume; falando = barras pulsam.
-const SHAPE = Array.from({ length: 28 }, (_, i) => 0.35 + 0.65 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)));
-function Meter({ level, mode }) {
+// A esfera da Faísca: manchas de luz girando; cresce com a voz.
+function Orb({ mode, level }) {
+  const cls = mode === "idle" ? "idle" : mode === "think" ? "think" : "";
   return (
-    <div className={`fa-meter ${mode}`} aria-hidden="true">
-      {SHAPE.map((k, i) => (
-        <i key={i}
-          style={{ height: mode === "on" ? `${8 + level * 88 * k}%` : mode === "speak" ? `${30 + 60 * k}%` : "6%", animationDelay: `${(i % 7) * 0.09}s` }} />
-      ))}
+    <div className={`fa-orb ${cls}`} style={{ "--lvl": level }} aria-hidden="true">
+      <i /><i /><i /><i />
     </div>
   );
 }
