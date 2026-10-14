@@ -23,7 +23,7 @@ Tudo fica no `localStorage` do aparelho (backup em Ajustes).
 ## Rodar
 
 ```bash
-git clone https://github.com/gaga190608/faisca-app && cd faisca-app
+git clone https://github.com/gaga190608/fa-sca-app && cd fa-sca-app
 npm ci
 cp .env.example .env.local   # GROQ_API_KEY (e ELEVENLABS_API_KEYS pra voz) — opcionais
 npm run dev                   # http://localhost:3000
