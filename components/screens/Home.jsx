@@ -4,6 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 
 import { useApp } from "@/components/AppContext";
 import { Icon } from "@/components/icons";
+import FaiscaIcon from "@/components/FaiscaIcon";
 import { MicButton, OfflineBanner } from "@/components/ui";
 import { nowStatus, localPriority, toHHMM, formatDuration, nowMin } from "@/lib/routine";
 import { relativeDay } from "@/lib/dates";
@@ -61,12 +62,13 @@ export default function Home() {
       <section className="fa-hero">
         <div className="fa-mesh" aria-hidden="true"><i /><i /><i /><i /></div>
         <div className="fa-hero-inner">
-          <div className="fa-eyebrow fa-word-in"><span>{hello()}{profile.name ? `, ${profile.name}` : ""}.</span></div>
+          <FaiscaIcon size={92} ignite label="Faísca" className="fa-hero-icon" />
+          <div className="fa-eyebrow fa-word-in"><span style={{ animationDelay: "250ms" }}>{hello()}{profile.name ? `, ${profile.name}` : ""}.</span></div>
           <h1 className="fa-hero-title fa-word-in" style={{ marginTop: 10 }}>
-            <Words text="No que você tá" from={80} />
-            <span className="fa-spark-text" style={{ animationDelay: "360ms" }}>pensando?</span>
+            <Words text="No que você tá" from={330} />
+            <span className="fa-spark-text" style={{ animationDelay: "610ms" }}>pensando?</span>
           </h1>
-          <p className="fa-sub fa-word-in"><span style={{ animationDelay: "480ms" }}>Eu não te dou a resposta pronta. Te mostro o caminho — quem chega lá é você.</span></p>
+          <p className="fa-sub fa-word-in"><span style={{ animationDelay: "730ms" }}>Eu não te dou a resposta pronta. Te mostro o caminho — quem chega lá é você.</span></p>
 
           <OfflineBanner />
 
@@ -117,7 +119,7 @@ export default function Home() {
             <span className="fa-more">Organizar <Icon name="chevron" size={15} /></span>
           </button>
           <button className="fa-tile night wide fa-reveal fa-press" onClick={() => { unlockAudio(); go("call"); }}>
-            <span className="fa-tile-orb" aria-hidden="true" />
+            <FaiscaIcon size={150} className="fa-tile-icon" />
             <small>Por voz</small>
             <b style={{ fontSize: 28 }}>Fala que ela escuta.</b>
             <span className="fa-more">Ligar pra Faísca <Icon name="chevron" size={15} /></span>

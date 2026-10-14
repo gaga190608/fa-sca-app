@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useApp } from "@/components/AppContext";
 import { Icon } from "@/components/icons";
+import FaiscaIcon from "@/components/FaiscaIcon";
 import { buildCallSystem, callFaisca, toHistory, OfflineError } from "@/lib/ai";
 import {
   speak, stopSpeaking, prefetchVoice, unlockAudio, recordUtterance, transcribe,
@@ -194,7 +195,7 @@ export default function Call() {
           <div className="fa-call-top">
             <button className="fa-link" onClick={() => go("home")}><Icon name="back" size={22} /> Início</button>
           </div>
-          <div className="fa-orb-wrap"><Orb mode="idle-intro" level={0} /></div>
+          <div className="fa-orb-wrap"><FaiscaIcon size={180} ignite label="Faísca" /></div>
           <p className="fa-eyebrow" style={{ color: "var(--night-ink-2)" }}>Ligação</p>
           <h1 className="fa-hero-title fa-word-in">
             <span>Fala</span> <span style={{ animationDelay: "70ms" }}>que</span> <span style={{ animationDelay: "140ms" }}>eu</span>{" "}
@@ -238,7 +239,7 @@ export default function Call() {
   const speaking = !paused && status === "speaking";
   const lastFa = [...lines].reverse().find((l) => l.who === "fa");
   const lastMe = [...lines].reverse().find((l) => l.who === "eu");
-  const mode = paused ? "idle" : speaking ? "speak" : listening ? "listen" : "think";
+  const mode = paused ? "off" : speaking ? "speak" : listening ? "listen" : "think";
 
   return (
     <main className="fa-call">
@@ -248,7 +249,7 @@ export default function Call() {
           <span className="fa-call-time" data-tick={tick}>{clock(Date.now() - startedAt)}</span>
           <span className="fa-call-time">Faísca</span>
         </div>
-        <div className="fa-orb-wrap"><Orb mode={mode} level={listening ? level : speaking ? 0.35 : 0} /></div>
+        <div className="fa-orb-wrap"><FaiscaIcon size={200} state={mode} level={listening ? level : 0} /></div>
         <h1 className="fa-call-status" aria-live="polite">{paused ? STATUS.paused : STATUS[status]}</h1>
         <div className="fa-captions">
           {lastMe && <p className="me">{lastMe.text}</p>}
@@ -268,15 +269,5 @@ export default function Call() {
         </div>
       </div>
     </main>
-  );
-}
-
-// A esfera da Faísca: manchas de luz girando; cresce com a voz.
-function Orb({ mode, level }) {
-  const cls = mode === "idle" ? "idle" : mode === "think" ? "think" : "";
-  return (
-    <div className={`fa-orb ${cls}`} style={{ "--lvl": level }} aria-hidden="true">
-      <i /><i /><i /><i />
-    </div>
   );
 }

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { useApp } from "@/components/AppContext";
 import { Icon } from "@/components/icons";
+import FaiscaIcon from "@/components/FaiscaIcon";
 import { Segmented, Switch } from "@/components/ui";
 import { exportBackup, parseBackup } from "@/lib/storage";
 import { speak, unlockAudio } from "@/lib/speech";
@@ -89,6 +90,7 @@ export default function Settings() {
       <p className="fa-caption" style={{ marginLeft: 16 }}>Tudo fica só neste aparelho. Faça um backup pra levar pra outro celular.</p>
 
       <section className="fa-about fa-reveal">
+        <FaiscaIcon size={72} className="fa-about-icon" />
         <b><span className="fa-spark-text">Como a Faísca pensa.</span></b>
         <p>Quando você pede ideias, ela não entrega a resposta: mostra os passos do caminho e te devolve uma pergunta. Na hora de se organizar, aí sim ela diz por onde começar — olhando seus prazos, sua energia e sua rotina.</p>
       </section>

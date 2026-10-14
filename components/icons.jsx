@@ -35,19 +35,25 @@ export function Icon({ name, size = 20, className, filled }) {
   );
 }
 
-// A marca: faísca de 4 pontas preenchida com o gradiente da marca.
-export function Mark({ size = 22, className }) {
+// A marca pequena: o fogo da faísca com uma lâmpada clara dentro.
+// Simplificada pra ler bem em 14–28px. Grande e animada: components/FaiscaIcon.jsx.
+// flicker = o fogo tremula em volta da lâmpada (usado no "pensando").
+export function Mark({ size = 22, className = "", flicker }) {
   const id = `fa-mark${useId().replace(/:/g, "")}`;
   return (
-    <svg className={className} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <svg className={`fa-mark ${flicker ? "flicker" : ""} ${className}`} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#FF2D55" />
-          <stop offset=".45" stopColor="#FF3B30" />
-          <stop offset="1" stopColor="#FF9500" />
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFA20A" />
+          <stop offset=".5" stopColor="#FF4F1F" />
+          <stop offset="1" stopColor="#D9142B" />
         </linearGradient>
       </defs>
-      <path fill={`url(#${id})`} d="M12 1.5c.9 6.1 3.6 8.8 10 10-6.4 1.2-9.1 3.9-10 10-.9-6.1-3.6-8.8-10-10 6.4-1.2 9.1-3.9 10-10z" />
+      <path className="fa-mark-flame" fill={`url(#${id})`}
+        d="M12 1.2C13.6 4.4 18.4 7.2 18.8 13.2C19.2 18.4 16 22.4 12 22.4C8 22.4 4.8 18.8 5.2 14C5.4 10.8 7.2 8.8 8.4 7.2C8.4 9.6 9.4 11.2 10.6 11.6C9.8 8.4 10.4 4.8 12 1.2Z" />
+      <path fill="#FFF6E0" d="M10.6 17.4C10.6 16.4 8.3 15.6 8.3 13.4A3.7 3.7 0 1 1 15.7 13.4C15.7 15.6 13.4 16.4 13.4 17.4Z" />
+      <rect x="10.5" y="18" width="3" height="1.1" rx=".55" fill="#FFE7C2" />
+      <rect x="10.9" y="19.5" width="2.2" height="1" rx=".5" fill="#FFE7C2" />
     </svg>
   );
 }

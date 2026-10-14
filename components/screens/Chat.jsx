@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useApp } from "@/components/AppContext";
 import { Icon, Mark } from "@/components/icons";
+import FaiscaIcon from "@/components/FaiscaIcon";
 import { Composer, PathSteps, SpeakButton, OfflineBanner } from "@/components/ui";
 import { askFaisca, offlineReply, OfflineError } from "@/lib/ai";
 import { speak, stopSpeaking } from "@/lib/speech";
@@ -93,6 +94,7 @@ export default function Chat() {
           <OfflineBanner />
           {messages.length === 0 && !loading && (
             <div className="fa-empty">
+              <FaiscaIcon size={80} ignite className="fa-empty-icon" />
               <h1 className="fa-section">Me conta. <span>O que você quer resolver, criar ou organizar?</span></h1>
             </div>
           )}
@@ -116,7 +118,7 @@ export default function Chat() {
           )}
           {loading && (
             <div className="fa-typing" role="status">
-              <div className="fa-ai-who"><Mark size={14} /> Faísca</div>
+              <div className="fa-ai-who"><Mark size={16} flicker /> Faísca</div>
               <span className="fa-thinking">Pensando no caminho…</span>
             </div>
           )}

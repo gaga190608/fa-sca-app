@@ -50,6 +50,7 @@ Diagnóstico: `/api/chat` (IA) e `/api/voice` (chaves de voz) abertos no navegad
 | `lib/speech.js` | `speak()`, `useVoiceInput()`, `recordUtterance()` (igual ao QuestHero) |
 | `components/AppContext.jsx` | Estado global (`useApp()`), navegação `go(tab, params)` |
 | `DESIGN.md` | Sistema visual (estilo Apple + movimento): cores, tipos, componentes, verificação |
-| `components/icons.jsx` | Ícones próprios (estilo SF Symbols) e a marca (faísca de 4 pontas) |
+| `components/FaiscaIcon.jsx` | A cara do app: faísca com lâmpada dentro, animada (ignição, pensando, ouvindo, falando) |
+| `components/icons.jsx` | Ícones próprios (estilo SF Symbols) e a marca pequena (`Mark`) |
 | `components/screens/` | `Home`, `Chat`, `Organize` (+ `Routine`), `Call`, `Settings` |
 | `app/globals.css` | Tokens (claro/escuro), movimento e classes `fa-*`, seguindo o `DESIGN.md` |
