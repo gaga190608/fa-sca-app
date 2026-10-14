@@ -14,7 +14,7 @@ import FaiscaIcon from "@/components/FaiscaIcon";
 import { buildCallSystem, callFaisca, toHistory, OfflineError } from "@/lib/ai";
 import {
   speak, stopSpeaking, prefetchVoice, unlockAudio, recordUtterance, transcribe,
-  cloudSttEnabled, canDictate, dictateUtterance, stopDictation,
+  cloudSttEnabled, canDictate, dictateUtterance, stopDictation, prepareVoice,
 } from "@/lib/speech";
 
 const STATUS = {
@@ -79,11 +79,23 @@ export default function Call() {
       try {
         return (await transcribe(blob)).trim();
       } catch {
+        // o servidor falhou: daqui pra frente vai pelo ditado do celular (transcribe já trocou)
         if (!canDictate()) throw new Error("stt");
+        const again = "Não peguei o que você falou. Pode repetir?";
+        pushLine("fa", again);
+        await say(again);
         return "";
       }
     }
-    if (canDictate()) return (await dictateUtterance()).trim();
+    if (canDictate()) {
+      try {
+        return (await dictateUtterance()).trim();
+      } catch (e) {
+        // silêncio, ou o ditado foi interrompido (pausa/desligar): não é erro
+        if (["no-speech", "aborted"].includes(e?.message) || pausedRef.current || !liveRef.current) return "";
+        throw e;
+      }
+    }
     throw new Error("sem microfone");
   }
 
@@ -99,8 +111,8 @@ export default function Call() {
       let text = "";
       try {
         text = await listenOnce();
-      } catch {
-        setError("Não consegui usar o microfone. Confere a permissão do navegador.");
+      } catch (e) {
+        setError(e?.userMessage || "Não consegui usar o microfone. Confere a permissão do navegador.");
         break;
       }
       if (!liveRef.current) break;
@@ -138,6 +150,7 @@ export default function Call() {
     const AC = window.AudioContext || window.webkitAudioContext;
     ctxRef.current = AC ? new AC() : null;
     await ctxRef.current?.resume?.();
+    await prepareVoice(); // sabe antes se a transcrição do servidor está disponível
     if (!ctxRef.current && !canDictate()) {
       setError("Seu navegador não deixa usar o microfone aqui.");
       return;

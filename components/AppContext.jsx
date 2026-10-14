@@ -64,11 +64,11 @@ export function AppProvider({ children }) {
 
   /* ---------------- conversas ---------------- */
   // Salva (ou cria) a conversa e devolve o id.
-  const saveChat = useCallback((id, messages) => {
+  const saveChat = useCallback((id, messages, mode = null) => {
     const cid = id || uid();
     const firstUser = messages.find((m) => m.role === "user")?.content || "Conversa";
     const title = firstUser.length > 48 ? `${firstUser.slice(0, 48)}…` : firstUser;
-    setChats((list) => [{ id: cid, title, at: Date.now(), messages }, ...list.filter((c) => c.id !== cid)]);
+    setChats((list) => [{ id: cid, title, at: Date.now(), mode, messages }, ...list.filter((c) => c.id !== cid)]);
     return cid;
   }, []);
   const removeChat = useCallback((id) => setChats((list) => list.filter((c) => c.id !== id)), []);

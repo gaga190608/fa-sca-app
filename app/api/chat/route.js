@@ -3,7 +3,9 @@
 //  Mesma rota do QuestHero. A chave vem de process.env.GROQ_API_KEY (fica só no servidor).
 //  Groq usa o formato compatível com OpenAI.
 //
-//  POST  entrada: { system, messages:[{role,content}], max_tokens, json }
+//  POST  entrada: { system, messages:[{role,content}], max_tokens, json, creative?, reasoning? }
+//        creative: true → temperatura alta (modo indicações: divergir)
+//        reasoning: "low" (padrão) | "medium" | "high" → quanto o modelo pensa antes
 //        saída OK: { text }
 //        falhas (sempre status 200, pro front cair no modo offline):
 //          { _noKey: true }  ·  { _apiError: true, kind, status, detail }
@@ -31,7 +33,8 @@ const MODELS = [
 
 // Os gpt-oss "pensam" antes de responder e esse raciocínio gasta tokens
 // do limite de saída — então damos uma folga além do que o app pediu.
-const REASONING_HEADROOM = 1500;
+// Mais raciocínio = mais folga (o raciocínio come o limite de saída).
+const REASONING_HEADROOM = { low: 1500, medium: 3500, high: 6000 };
 
 // Limites pra rota pública não virar porta aberta pra gastar a cota da chave.
 const MAX_TOKENS_CAP = 2500;
@@ -61,16 +64,16 @@ const isModelGone = (status, err) =>
 const isJsonFailure = (err) => /json_validate_failed|json/i.test(err.code);
 
 // Uma chamada ao Groq com um modelo. Devolve { ok, text } ou { ok:false, status, err }.
-async function callGroq(model, messages, maxTokens, json) {
+async function callGroq(model, messages, maxTokens, json, opts) {
   const r = await fetch(GROQ_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
     body: JSON.stringify({
       model,
       messages,
-      max_completion_tokens: maxTokens + REASONING_HEADROOM,
-      temperature: 0.7,
-      reasoning_effort: "low",
+      max_completion_tokens: maxTokens + REASONING_HEADROOM[opts.effort],
+      temperature: opts.temperature,
+      reasoning_effort: opts.effort,
       include_reasoning: false,
       // Modo JSON: garante que a resposta seja um objeto JSON válido.
       ...(json ? { response_format: { type: "json_object" } } : {}),
@@ -86,12 +89,12 @@ async function callGroq(model, messages, maxTokens, json) {
 
 // Tenta os modelos em ordem. JSON inválido → repete sem o modo JSON
 // (lib/ai.js já sabe extrair o JSON do texto).
-async function complete(messages, maxTokens, json) {
+async function complete(messages, maxTokens, json, opts = { temperature: 0.7, effort: "low" }) {
   let last = { status: 500, err: { code: "", message: "nenhum modelo disponível" } };
   for (const model of MODELS) {
-    let res = await callGroq(model, messages, maxTokens, json);
+    let res = await callGroq(model, messages, maxTokens, json, opts);
     if (!res.ok && json && res.status === 400 && isJsonFailure(res.err)) {
-      res = await callGroq(model, messages, maxTokens, false);
+      res = await callGroq(model, messages, maxTokens, false, opts);
     }
     if (res.ok) return { ...res, model };
     console.error(`[api/chat] ${model} → ${res.status} ${res.err.code}: ${res.err.message}`);
@@ -142,9 +145,13 @@ export async function POST(req) {
   }
 
   const maxTokens = Math.min(Math.max(Number(body.max_tokens) || 1000, 1), MAX_TOKENS_CAP);
+  const opts = {
+    temperature: body.creative ? 1 : 0.7,
+    effort: ["low", "medium", "high"].includes(body.reasoning) ? body.reasoning : "low",
+  };
 
   try {
-    const res = await complete(messages, maxTokens, !!body.json);
+    const res = await complete(messages, maxTokens, !!body.json, opts);
     if (!res.ok) return failure(res.status, res.err);
     return Response.json({ text: res.text }, { status: 200 });
   } catch (e) {

@@ -23,8 +23,16 @@ Diagnóstico em produção: `/api/chat` (IA) e `/api/voice` (chaves de voz) aber
 Ver `README.md` (tabela). Pontos-chave:
 - `app/api/chat/route.js` — contrato `{ system, messages, max_tokens, json }` → `{ text }`; falhas com **status 200**
   e `{ _noKey }` / `{ _apiError, kind }` (o front entra em modo sem IA). Limites protegem a cota da chave.
-- `lib/ai.js` — prompts e validação. Chat responde JSON `{fala, passos[], pergunta}`; "despejar tarefas" e
+- `lib/ai.js` — prompts e validação. Chat responde JSON `{fala, passos[], pergunta, escolha}`; "despejar tarefas" e
   "por onde eu começo" também em JSON, sempre com plano B local.
+- **Modos de ajuda com ideias** (por conversa, salvo em `fa:chats[].mode`): quando ela pede ideias e ainda não escolheu,
+  a Faísca pergunta "Quer indicações minhas ou quer que eu te ajude a pensar?" (detector local `isIdeaRequest`, sem gastar IA;
+  a IA também pode pedir com `escolha: true`). `guide` = caminho socrático; `ideas` = indicações prontas.
+- `lib/ideas.js` — motor das indicações em 2 passadas: **divergir** (`creative`, `reasoning: "medium"`: objetivo real,
+  lista do óbvio PROIBIDO, 10 candidatas por 10 lentes) → **curar** (diretora de criação pontua e entrega 4, de "segura" a
+  "fora da curva", com virada e primeiro passo). No modo `ideas`, só gera nova leva quando ela pede ideias; o resto é
+  conversa direta (prompt `IDEAS_PRINCIPLES` em ai.js). Mexeu nos prompts? Mantenha as lentes e a lista do óbvio.
+- `/api/chat` aceita `creative` (temperatura 1) e `reasoning` ("low" | "medium" | "high"; folga de tokens maior).
 - `lib/routine.js` — rotina, horários livres e prioridade local (funções puras).
 - `lib/storage.js` — chaves `fa:profile|tasks|routine|chats` + backup. Mudou formato? Migre nos `normalize*`.
 - `components/AppContext.jsx` — estado global (`useApp()`), navegação `go(tab, params)` (cada `go` remonta a tela).
@@ -46,6 +54,9 @@ com `prefers-reduced-motion` sem esconder conteúdo. Antes de dizer que está pr
 - O Groq desliga modelos de tempos em tempos: a rota tenta a lista `MODELS` em ordem; os gpt-oss gastam tokens
   pensando, por isso `REASONING_HEADROOM`.
 - `unlockAudio()` precisa rodar dentro de um toque (iPhone) antes de tocar áudio.
+- Microfone: `prepareVoice()` pergunta ao `/api/voice` ANTES do 1º toque se a transcrição do servidor existe; a rota
+  (servidor ou ditado do celular) é decidida na hora do toque, e qualquer falha do servidor troca pro ditado na sessão.
+  Antes disso, sem chave a 1ª fala se perdia e, com chave sem cota, nunca transcrevia.
 - Rate limit da rota é em memória por instância (aproximado na Vercel).
 - No ambiente do Claude, `fetch` do servidor só passa pelo proxy com `NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt`.
 - Pra testar a UI sem chave: `next start` em background + Playwright interceptando `/api/chat` (responda conforme o `system`).

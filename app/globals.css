@@ -268,6 +268,31 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .fa-send:disabled { opacity: .3; transform: scale(.9); }
 .fa-busy { animation: fa-dots 1.2s infinite; }
 
+/* indicações: escolha do modo, cartões de ideia, seletor acima do campo */
+.fa-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+@media (max-width: 360px) { .fa-choice { grid-template-columns: 1fr; } }
+.fa-choice-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; background: var(--canvas); border-radius: var(--r-md); padding: 16px; box-shadow: var(--shadow); min-height: 44px; }
+.fa-choice-btn svg { color: var(--accent-ink); margin-bottom: 6px; }
+.fa-choice-btn b { font-family: var(--f-display); font-weight: 600; font-size: 17px; }
+.fa-choice-btn small { font-size: 13px; color: var(--ink-2); line-height: 1.35; }
+@media (hover: hover) { .fa-choice-btn:hover { box-shadow: var(--shadow-up); } }
+.fa-ideas { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.fa-idea { background: var(--canvas); border-radius: var(--r-md); padding: 16px 18px 8px; box-shadow: var(--shadow); animation: fa-enter .4s var(--ease-out) both; }
+.fa-idea h3 { margin: 10px 0 0; font-family: var(--f-display); font-weight: 600; font-size: 21px; line-height: 1.2; letter-spacing: -.02em; }
+.fa-idea > p { margin: 6px 0 0; font-size: 17px; line-height: 1.45; }
+.fa-idea > p.fa-virada { font-size: 15px; color: var(--ink-2); }
+.fa-virada b { color: var(--ink); font-weight: 600; }
+.fa-ousadia { display: inline-flex; align-items: center; min-height: 24px; padding: 0 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 600; letter-spacing: .01em; background: var(--fill); color: var(--ink-chip); }
+.fa-ousadia.o-ousada { background: color-mix(in srgb, var(--accent) 12%, var(--canvas)); color: var(--accent-ink); }
+.fa-ousadia.o-fora-da-curva { background: var(--accent); color: #FFFFFF; }
+.fa-firststep { margin-top: 12px; background: var(--fill); border-radius: var(--r-sm); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.fa-firststep small { font-size: 12px; font-weight: 600; color: var(--ink-chip); text-transform: uppercase; letter-spacing: .02em; }
+.fa-firststep span { font-size: 15px; line-height: 1.4; }
+.fa-idea-actions { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 4px; }
+.fa-more-ideas { margin-top: 12px; }
+.fa-modebar { max-width: 680px; margin: 0 auto 8px; }
+.fa-modebar .fa-seg { max-width: 300px; margin: 0 auto; }
+
 /* ---------------- organizar ---------------- */
 .fa-dump { margin-top: 16px; background: var(--canvas); border-radius: var(--r-md); box-shadow: var(--shadow); }
 .fa-dump textarea { display: block; width: 100%; border: none; outline: none; background: none; resize: none; padding: 14px 16px 4px; font-size: 17px; line-height: 1.4; min-height: 80px; }

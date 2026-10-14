@@ -107,7 +107,7 @@ export function SpeakButton({ text }) {
 // Toca → grava. Toca de novo → transcreve (ElevenLabs; plano B: ditado do navegador).
 export function MicButton({ onText, disabled }) {
   const { toast } = useApp();
-  const { state, start, stop, supported } = useVoiceInput(onText, () => toast("Não consegui ouvir. Tenta de novo?"));
+  const { state, start, stop, supported } = useVoiceInput(onText, (e) => toast(e?.userMessage || "Não consegui ouvir. Tenta de novo?"));
   if (!supported) return null;
   const label = state === "recording" ? "Parar e transcrever" : state === "transcribing" ? "Transcrevendo" : "Falar";
   return (
@@ -177,6 +177,56 @@ export function PathSteps({ steps, checked = [], onToggle, onToTasks }) {
           </li>
         )}
       </ul>
+    </div>
+  );
+}
+
+/* ------------------------------ indicações ------------------------------ */
+
+// "Quer indicações minhas ou quer que eu te ajude a pensar?"
+export function ModeChoice({ onPick }) {
+  return (
+    <div className="fa-choice" role="group" aria-label="Como você quer ajuda">
+      <button className="fa-choice-btn fa-press" onClick={() => onPick("ideas")}>
+        <Icon name="sparkle" size={24} />
+        <b>Quero indicações</b>
+        <small>Ideias fora da caixinha, prontas pra usar.</small>
+      </button>
+      <button className="fa-choice-btn fa-press" onClick={() => onPick("guide")}>
+        <Icon name="list" size={24} />
+        <b>Me ajuda a pensar</b>
+        <small>Passo a passo, pra ideia sair de você.</small>
+      </button>
+    </div>
+  );
+}
+
+const OUSADIA_LABEL = { segura: "Segura", ousada: "Ousada", "fora da curva": "Fora da curva" };
+
+// Cartões das indicações: ousadia, a ideia, a virada e o primeiro passo.
+export function IdeaCards({ ideas, onTask, onDevelop }) {
+  if (!ideas?.length) return null;
+  return (
+    <div className="fa-ideas">
+      {ideas.map((d, i) => (
+        <article key={i} className="fa-idea" style={{ animationDelay: `${i * 80}ms` }}>
+          <span className={`fa-ousadia o-${(d.ousadia || "ousada").replace(/\s+/g, "-")}`}>{OUSADIA_LABEL[d.ousadia] || "Ousada"}</span>
+          <h3>{d.titulo}</h3>
+          <p>{d.ideia}</p>
+          {d.virada && <p className="fa-virada"><b>A virada:</b> {d.virada}</p>}
+          {d.primeiro_passo && (
+            <div className="fa-firststep"><small>Primeiro passo</small><span>{d.primeiro_passo}</span></div>
+          )}
+          <div className="fa-idea-actions">
+            {onTask && d.primeiro_passo && (
+              <button className="fa-link small" onClick={() => onTask(d)}><Icon name="plus" size={17} /> Virar tarefa</button>
+            )}
+            {onDevelop && (
+              <button className="fa-link small" onClick={() => onDevelop(d)}><Icon name="bubble" size={17} /> Desenvolver essa</button>
+            )}
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
